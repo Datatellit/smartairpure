@@ -63,5 +63,6 @@ void GotPresented();
 bool SendMyMessage();
 void tmrProcess();
 void ProcessMyMessage();
+uint16_t GetDelayTick(uint8_t ds);
 
 #endif /* __GLOBAL_H */

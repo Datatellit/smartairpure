@@ -7,7 +7,7 @@
 
 uint8_t bMsgReady = 0;
 uint16_t delaySendTick = 0;
-uint8_t delaySend = FALSE;
+uint8_t bDelaySend = FALSE;
 void Process_SetConfig(u8 _len);
 void Process_SetDevConfig(u8 _len);
 void MsgScanner_ProbeAck() ;
@@ -119,6 +119,8 @@ uint8_t ParseProtocol(){
   bool _isAck = (bool)miGetAck();
   bool _OnOff;
   uint8_t targetSubID;
+  bDelaySend = FALSE;
+  delaySendTick = 0;
   
   switch( _cmd ) {
   case C_INTERNAL:
@@ -172,13 +174,38 @@ uint8_t ParseProtocol(){
         if(_lenPayl >= 2) 
         {
           uint8_t rfchannel = rcvMsg.payload.data[1];
-          gConfig.rfChannel = rfchannel;
-          gResetRF = TRUE;
+          if(rfchannel != 0)
+          {
+            gConfig.rfChannel = rfchannel;
+            gResetRF = TRUE;
+          }
         }
         if(_lenPayl >= 3)
         {
           uint8_t subid = rcvMsg.payload.data[2];
           gConfig.subID = subid;
+        }
+        if(_lenPayl >= 4)
+        {
+          uint8_t netlen = _lenPayl - 3;
+          uint8_t bnetvalid = 0;
+          for(uint8_t i = 0;i<netlen;i++)
+          {
+            if(rcvMsg.payload.data[3+i] != 0) 
+            {
+              bnetvalid = 1;
+              break;
+            }
+          }
+          if(bnetvalid)
+          {
+            memset(gConfig.NetworkID,0x00,sizeof(gConfig.NetworkID));
+            for(uint8_t j = 0;j<netlen;j++)
+            {
+              gConfig.NetworkID[4-j] = rcvMsg.payload.data[3+j];
+            }
+            gResetRF = TRUE;
+          }
         }
         break;
       }
@@ -237,14 +264,44 @@ uint8_t ParseProtocol(){
     if( _needAck ) {
       if( IS_MINE_SUBID(_sensor) ) {
         if( _type == V_STATUS ) {
+/*
+//typedef struct
+//{
+//    //uint8_t devNum;
+//    uint8_t devType1;
+//    uint8_t devType2;
+//    uint8_t devType3;
+      ...
+//    uint8_t devType5;
+//}MyMsgPayload_t  
+*/ 
+          bool bNeedProcess = TRUE;
+          if(rcvMsg.header.destination == 0xFF)
+          {
+            uint8_t devTypeNum = _lenPayl;
+            if(devTypeNum > 0)
+            {
+              bNeedProcess = NeedProcess(&rcvMsg.payload.data[0],devTypeNum);
+            }
+          }
+          if(bNeedProcess)
+          {
+            Msg_DevStatus(_sender);
+            bDelaySend = (rcvMsg.header.destination == BROADCAST_ADDRESS);
+            delaySendTick = GetDelayTick(rcvMsg.header.destination);
+          }
+          return 1;          
         }
       }
     }    
     break;  
   case C_SET:
     if( IS_MINE_SUBID(_sensor) && !_isAck ) {
+      bool bValidCmd = FALSE;
+      bool bNeedProcess = TRUE;
        if(_type == V_WIND)
       {
+        bValidCmd = TRUE;
         uint8_t airpurestatus[CMD_LEN];
         memset(airpurestatus,0x00,sizeof(airpurestatus));
         memcpy(airpurestatus,&rcvMsg.payload.data[0],_lenPayl);
@@ -254,13 +311,9 @@ uint8_t ParseProtocol(){
           memcpy(gConfig.airpureLastOn,&rcvMsg.payload.data[0],_lenPayl);
         }*/
         AddCmd(airpurestatus,_lenPayl);
-        if(_needAck)
-        {
-          delaySend = TRUE;
-          delaySendTick = 10;
-        }
       }
       else if(_type == V_STATUS) {
+        bValidCmd = TRUE;
 /*
 //typedef struct
 //{
@@ -275,7 +328,6 @@ uint8_t ParseProtocol(){
 //    uint8_t devType5;
 //}MyMsgPayload_t    
 */   
-        bool bNeedProcess = TRUE;
         if(rcvMsg.header.destination == 0xFF)
         {
           if(_lenPayl > 3)
@@ -299,7 +351,8 @@ uint8_t ParseProtocol(){
           }
         }
       }
-      if(_type == V_RELAY_MAP) {
+      else if(_type == V_RELAY_MAP) {
+        bValidCmd = TRUE;
 /*
 //typedef struct
 //{
@@ -314,7 +367,6 @@ uint8_t ParseProtocol(){
 //}MyMsgPayload_t  
 no dev type default all
 */  
-        bool bNeedProcess = TRUE;
         uint8_t relaycmdLen = rcvMsg.payload.data[0];
         if(rcvMsg.header.destination == 0xFF)
         {
@@ -338,6 +390,12 @@ no dev type default all
             AddCmd(&windspeed,1);        
           }
         }
+      }
+      if(bValidCmd && bNeedProcess && _needAck)
+      {
+          //Msg_DevStatus(_sender);
+          bDelaySend = TRUE;
+          delaySendTick = GetDelayTick(rcvMsg.header.destination);
       }
     }
     break;

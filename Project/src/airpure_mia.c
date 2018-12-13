@@ -117,6 +117,7 @@ bool SendCmd()
     memcpy(&gConfig.airpureLaston,&data[5],CMD_LEN);
   }
   memcpy(&gConfig.airpureStatus,&data[5],CMD_LEN);
+  gIsStatusChanged = TRUE;
   /////////////////////update status////////////////////////////
   return TRUE;
 }

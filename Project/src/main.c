@@ -7,7 +7,7 @@
 #include "FlashDataStorage.h"
 #include "wwdg.h"
 #include "Uart2Dev.h"
-
+#include "airpure_mia.h"
 /*
 License: MIT
 
@@ -300,6 +300,20 @@ bool NeedUpdateRFAddress(uint8_t _dest) {
   return rc;
 }
 
+uint16_t GetDelayTick(uint8_t ds)
+{
+  uint16_t delaytick = 0;
+  if(ds == BROADCAST_ADDRESS)
+  {  
+    delaytick = ((gConfig.nodeID - XLA_PRODUCT_NODEID+1)%32)*40;
+  }
+  else
+  {
+    delaytick = 10;   //airpure delay 100ms for airpure state ack
+  }
+  return delaytick;
+}
+
 // Send message and switch back to receive mode
 bool SendMyMessage() {
   if( bMsgReady ) {
@@ -309,63 +323,64 @@ bool SendMyMessage() {
       
     uint8_t lv_tried = 0;
     uint16_t delay;
-    while (lv_tried++ <= gConfig.rptTimes ) {
-      
-      mutex = 0;
-      if(RF24L01_set_mode_TX_timeout() == -1) 
-        break;
-      if(RF24L01_write_payload_timeout(psndMsg, PLOAD_WIDTH) == -1) 
-        break;
-      WaitMutex(0x1FFFF);
-      if (mutex == 1) {
-        m_cntRFSendFailed = 0;
-        m_cntRFReset = 0;
-        break; // sent sccessfully
-      } else {
-        m_cntRFSendFailed++;
-        if( m_cntRFSendFailed >= MAX_RF_FAILED_TIME ) {
-          m_cntRFSendFailed = 0;
-          m_cntRFReset++;
-          /*if( m_cntRFReset >= 3 ) {
-            // Cold Reset
-            if(XLA_PRODUCT_Type!=ZEN_TARGET_SWITCH)
-            {
-              WWDG->CR = 0x80;
-            }         
-            m_cntRFReset = 0;
-            break;
-          } else */
-          if( m_cntRFReset >= 3 ) {
-            // Reset whole node
-            mStatus = SYS_RESET;
-            break;
-          }
 
-          // Reset RF module
-          //RF24L01_DeInit();
-          delay = 0x1FFF;
-          while(delay--)feed_wwdg();
-          RF24L01_init();
-          NRF2401_EnableIRQ();
-          UpdateNodeAddress(NODEID_GATEWAY);
-          continue;
+      while (lv_tried++ <= gConfig.rptTimes ) {
+        
+        mutex = 0;
+        if(RF24L01_set_mode_TX_timeout() == -1) 
+          break;
+        if(RF24L01_write_payload_timeout(psndMsg, PLOAD_WIDTH) == -1) 
+          break;
+        WaitMutex(0x1FFFF);
+        if (mutex == 1) {
+          m_cntRFSendFailed = 0;
+          m_cntRFReset = 0;
+          break; // sent sccessfully
+        } else {
+          m_cntRFSendFailed++;
+          if( m_cntRFSendFailed >= MAX_RF_FAILED_TIME ) {
+            m_cntRFSendFailed = 0;
+            m_cntRFReset++;
+            /*if( m_cntRFReset >= 3 ) {
+              // Cold Reset
+              if(XLA_PRODUCT_Type!=ZEN_TARGET_SWITCH)
+              {
+                WWDG->CR = 0x80;
+              }         
+              m_cntRFReset = 0;
+              break;
+            } else */
+            if( m_cntRFReset >= 3 ) {
+              // Reset whole node
+              mStatus = SYS_RESET;
+              break;
+            }
+
+            // Reset RF module
+            //RF24L01_DeInit();
+            delay = 0x1FFF;
+            while(delay--)feed_wwdg();
+            RF24L01_init();
+            NRF2401_EnableIRQ();
+            UpdateNodeAddress(NODEID_GATEWAY);
+            continue;
+          }
         }
+        
+        //The transmission failed, Notes: mutex == 2 doesn't mean failed
+        //It happens when rx address defers from tx address
+        //asm("nop"); //Place a breakpoint here to see memory
+        // Repeat the message if necessary
+        delay = 0xFFF;
+        while(delay--)feed_wwdg();
       }
       
-      //The transmission failed, Notes: mutex == 2 doesn't mean failed
-      //It happens when rx address defers from tx address
-      //asm("nop"); //Place a breakpoint here to see memory
-      // Repeat the message if necessary
-      delay = 0xFFF;
-      while(delay--)feed_wwdg();
-    }
-    
-    // Switch back to receive mode
-    bMsgReady = 0;
-    RF24L01_set_mode_RX();
-    
-    // Reset Keep Alive Timer
-    mTimerKeepAlive = 0;
+      // Switch back to receive mode
+      bMsgReady = 0;
+      RF24L01_set_mode_RX();
+      
+      // Reset Keep Alive Timer
+      mTimerKeepAlive = 0;
   }
 
   return(mutex > 0);
@@ -431,6 +446,7 @@ int main( void ) {
       bRestart = 0;
     } 
     SendMyMessage();
+    RF24L01_set_mode_RX();
     mStatus = SYS_RUNNING;
     while (mStatus == SYS_RUNNING) {
       
@@ -438,10 +454,10 @@ int main( void ) {
       feed_wwdg();
       SendCmd();
       PraseMsg();
-      if(delaySendTick == 0 && delaySend)
+      if(delaySendTick == 0 && bDelaySend)
       {
         Msg_DevStatus(NODEID_GATEWAY);
-        delaySend = FALSE;
+        bDelaySend = FALSE;
       }
       if(!bMsgReady && m_StatusReportTick >= STATUS_REPORT_INTERVAL)
       {

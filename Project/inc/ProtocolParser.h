@@ -5,7 +5,7 @@
 
 extern uint8_t bMsgReady;
 extern uint16_t delaySendTick;
-extern uint8_t delaySend;
+extern uint8_t bDelaySend;
 
 uint8_t ParseProtocol();
 void build(uint8_t _destination, uint8_t _sensor, uint8_t _command, uint8_t _type, bool _enableAck, bool _isAck);
