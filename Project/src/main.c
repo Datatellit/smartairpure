@@ -340,17 +340,13 @@ bool SendMyMessage() {
           m_cntRFSendFailed++;
           if( m_cntRFSendFailed >= MAX_RF_FAILED_TIME ) {
             m_cntRFSendFailed = 0;
-            m_cntRFReset++;
-            /*if( m_cntRFReset >= 3 ) {
-              // Cold Reset
-              if(XLA_PRODUCT_Type!=ZEN_TARGET_SWITCH)
-              {
-                WWDG->CR = 0x80;
-              }         
-              m_cntRFReset = 0;
-              break;
-            } else */
+            if( m_cntRFReset < 10 ) m_cntRFReset++;
             if( m_cntRFReset >= 3 ) {
+              // Cold Reset
+                SaveConfig();
+                WWDG->CR = 0x80;
+              break;
+            } else if( m_cntRFReset >= 2 ) {
               // Reset whole node
               mStatus = SYS_RESET;
               break;
