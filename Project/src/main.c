@@ -277,7 +277,6 @@ void LoadConfig()
       memset(gConfig.btnAction, 0x00, sizeof(Button_Action_t) * MAX_NUM_BUTTONS);
     }
 #endif   
-    gConfig.rfChannel = 88;
 }
 
 bool WaitMutex(uint32_t _timeout) {

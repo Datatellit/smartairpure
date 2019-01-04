@@ -492,7 +492,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>switch_v2.0.0.hex</state>
+          <state>airpure.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
