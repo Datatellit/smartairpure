@@ -191,6 +191,7 @@
           <name>CCDefines</name>
           <state>STM8S105</state>
           <state>RF24</state>
+          <state>THENOW</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -262,6 +263,10 @@
           <state>$PROJ_DIR$\Project\inc</state>
           <state>$PROJ_DIR$\..\xlightCommon-stm8s\Xlight_lib</state>
           <state>$PROJ_DIR$\..\xlightCommon-stm8s\STM8S_StdPeriph_Driver\inc</state>
+          <state>D:\dtit\program\smartairpure\Project\modbus\include</state>
+          <state>D:\dtit\program\smartairpure\Project\modbus\port</state>
+          <state>D:\dtit\program\smartairpure\Project\modbus\rtu</state>
+          <state>D:\dtit\program\smartairpure\Project\modbus</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1729,6 +1734,12 @@
         <name>$PROJ_DIR$\Project\inc\airpure_mia.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\Project\inc\airpure_thenow.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\Project\inc\mbcrc.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\Project\inc\ProtocolParser.h</name>
       </file>
       <file>
@@ -1741,7 +1752,13 @@
         <name>$PROJ_DIR$\Project\src\airpure_mia.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\Project\src\airpure_thenow.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\Project\src\main.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\Project\src\mbcrc.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\Project\src\ProtocolParser.c</name>

@@ -1,6 +1,6 @@
 #ifndef __MIA_AIRPURE_H
 #define __MIA_AIRPURE_H
-
+#ifdef MIA
 typedef struct
 {
   uint8_t airpureStatus[14];
@@ -15,5 +15,5 @@ void mia_init(void);
 bool AddCmd(uint8_t *arrAirpurestatus,uint8_t statusLen);
 bool SendCmd();
 void PraseMsg();
-
+#endif
 #endif /* __MIA_AIRPURE_H */

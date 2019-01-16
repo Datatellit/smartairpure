@@ -153,6 +153,12 @@
         <name>$PROJ_DIR$\Project\inc\airpure_mia.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\Project\inc\airpure_thenow.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\Project\inc\mbcrc.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\Project\inc\ProtocolParser.h</name>
       </file>
       <file>
@@ -165,7 +171,13 @@
         <name>$PROJ_DIR$\Project\src\airpure_mia.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\Project\src\airpure_thenow.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\Project\src\main.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\Project\src\mbcrc.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\Project\src\ProtocolParser.c</name>

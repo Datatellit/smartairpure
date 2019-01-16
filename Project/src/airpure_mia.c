@@ -1,3 +1,4 @@
+#ifdef MIA
 #include <stm8s.h>
 #include "airpure_mia.h"
 #include "_global.h"
@@ -240,3 +241,4 @@ INTERRUPT_HANDLER(UART2_RX_IRQHandler, 21)
     UART2_ClearITPendingBit(UART2_IT_RXNE);
   }
 }
+#endif

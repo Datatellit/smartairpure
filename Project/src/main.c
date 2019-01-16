@@ -7,7 +7,12 @@
 #include "FlashDataStorage.h"
 #include "wwdg.h"
 #include "Uart2Dev.h"
+#ifdef MIA
 #include "airpure_mia.h"
+#endif
+#ifdef THENOW
+#include "airpure_thenow.h"
+#endif
 /*
 License: MIT
 
@@ -408,9 +413,11 @@ int main( void ) {
   
   // Init Watchdog
   wwdg_init();
-  
+
   uart2_config(9600);
-  
+#ifdef THENOW
+  thenow_init();
+#endif  
   // Init timer
   TIM4_10ms_handler = tmrProcess;
   Time4_Init();
@@ -444,10 +451,11 @@ int main( void ) {
     RF24L01_set_mode_RX();
     mStatus = SYS_RUNNING;
     while (mStatus == SYS_RUNNING) {
-      
       // Feed the Watchdog
       feed_wwdg();
-      SendCmd();
+
+      SendCmd();   
+
       PraseMsg();
       if(delaySendTick == 0 && bDelaySend)
       {
@@ -480,6 +488,16 @@ void tmrProcess() {
   mTimerKeepAlive++;
     // Save config into backup area
    SaveBackupConfig(); 
+#ifdef THENOW
+  if(lastsnd_tick < 30)
+  {
+    lastsnd_tick++;
+  }
+  if(lastrcv_tick < 30)
+  {
+    lastrcv_tick++;
+  }
+#endif
 }
 
 INTERRUPT_HANDLER(EXTI_PORTC_IRQHandler, 5) {

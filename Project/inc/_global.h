@@ -4,6 +4,8 @@
 #include "RelayPublicDefine.h"
 
 /* Exported types ------------------------------------------------------------*/
+//#define MIA
+#define THEOW
 
 #define XLA_PRODUCT_NODEID        NODEID_MIN_AIRPURE
 #define XLA_PRODUCT_Type          ZEN_TARGET_AIRPURIFIER

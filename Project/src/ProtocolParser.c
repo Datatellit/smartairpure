@@ -3,7 +3,12 @@
 #include "MyMessage.h"
 #include "xliNodeConfig.h"
 #include "rf24l01.h"
+#ifdef MIA
 #include "airpure_mia.h"
+#endif
+#ifdef THENOW
+#include "airpure_thenow.h"
+#endif
 
 uint8_t bMsgReady = 0;
 uint16_t delaySendTick = 0;
