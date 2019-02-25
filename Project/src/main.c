@@ -454,8 +454,18 @@ int main( void ) {
       // Feed the Watchdog
       feed_wwdg();
 
-      SendCmd();   
-
+      SendCmd();
+#ifdef THENOW
+      if(delayquery_tick >= QUERYINTERVAL)
+      {
+          delayquery_tick = 0;
+          QueryStatus();
+      }
+      if(uartcheck >= UARTCHECKTIMEOUT)
+      { // uart check
+          WWDG->CR = 0x80;
+      }
+#endif
       PraseMsg();
       if(delaySendTick == 0 && bDelaySend)
       {
@@ -496,6 +506,18 @@ void tmrProcess() {
   if(lastrcv_tick < 30)
   {
     lastrcv_tick++;
+  }
+  if(lastrcv_tick >= MSGTIMEOUT)
+  {
+    RtuMsgReady();
+  }
+  if(delayquery_tick <= QUERYINTERVAL)
+  {
+    delayquery_tick++;
+  }
+  if(uartcheck <= UARTCHECKTIMEOUT)
+  {
+    uartcheck++;
   }
 #endif
 }
