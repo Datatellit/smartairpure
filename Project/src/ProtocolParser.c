@@ -15,7 +15,6 @@ uint16_t delaySendTick = 0;
 uint8_t bDelaySend = FALSE;
 void Process_SetConfig(u8 _len);
 void Process_SetDevConfig(u8 _len);
-void MsgScanner_ProbeAck() ;
 void MsgScanner_ConfigAck(uint8_t offset,uint8_t cfglen,bool _isByUniqueid);
 void Process_SetupRF(const UC *rfData,uint8_t rflen);
 
@@ -219,9 +218,9 @@ uint8_t ParseProtocol(){
       return 1;
     } else if( _type == I_GET_NONCE ) {
       // RF Scanner Probe
-      if( _sender == NODEID_RF_SCANNER ) {
+      if( _sender == NODEID_RF_SCANNER || _sender == NODEID_GATEWAY) {
         if( rcvMsg.payload.data[0] == SCANNER_PROBE ) {      
-          MsgScanner_ProbeAck();
+          MsgScanner_ProbeAck(_sender);
         } else if( rcvMsg.payload.data[0] == SCANNER_SETUP_RF ) {
           if(!IS_MINE_SUBID(_sensor)) return 0;  
           Process_SetupRF(rcvMsg.payload.data + 1,_lenPayl-1);
@@ -473,9 +472,9 @@ void Msg_DevStatus(uint8_t _to) {
 // RF Scanner Messages
 //----------------------------------------------
 // Probe ack message
-void MsgScanner_ProbeAck() {
+void MsgScanner_ProbeAck(uint8_t _to) {
   uint8_t payl_len = UNIQUE_ID_LEN + 1;
-  build(NODEID_RF_SCANNER, 0x00, C_INTERNAL, I_GET_NONCE_RESPONSE, 0, 1);
+  build(_to, 0x00, C_INTERNAL, I_GET_NONCE_RESPONSE, 0, 1);
 
   // Common payload
   sndMsg.payload.data[0] = SCANNER_PROBE;

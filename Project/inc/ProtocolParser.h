@@ -15,7 +15,7 @@ void Msg_RequestNodeID();
 void Msg_Presentation();
 void Msg_DevStatus(uint8_t _to);
 
-void MsgScanner_ProbeAck();
+void MsgScanner_ProbeAck(uint8_t _to);
 void MsgScanner_ConfigAck(uint8_t offset,uint8_t cfglen,bool _isStart); 
 bool ProcessOutputCfgMsg();
 
