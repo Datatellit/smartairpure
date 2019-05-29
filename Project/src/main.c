@@ -47,8 +47,6 @@ Connections:
 
 #define STATUS_REPORT_INTERVAL          3000   // 30s
 
-const UC RF24_BASE_RADIO_ID[ADDRESS_WIDTH] = {0x00,0x54,0x49,0x54,0x44};
-
 // Public variables
 Config_t gConfig;
 MyMessage_t sndMsg, rcvMsg;
@@ -531,7 +529,7 @@ INTERRUPT_HANDLER(EXTI_PORTC_IRQHandler, 5) {
     //Packet was received
     RF24L01_clear_interrupts();
     RF24L01_read_payload(prcvMsg, PLOAD_WIDTH);
-    bMsgReady = ParseProtocol();
+    ParseProtocol();
 #ifdef TEST
     PB3_Low;
 #endif

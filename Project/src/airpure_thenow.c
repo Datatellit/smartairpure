@@ -4,6 +4,7 @@
 #include "Uart2Dev.h"
 #include "mbcrc.h"
 #include "timer_2.h"
+#include "ProtocolParser.h"
 
 #define ON_OFF_REG_ADDR                    40000
 #define MODE_REG_ADDR                      40001

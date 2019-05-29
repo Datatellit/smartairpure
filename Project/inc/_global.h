@@ -2,6 +2,7 @@
 #define __GLOBAL_H
 
 #include "RelayPublicDefine.h"
+#include "stm8sheader.h"
 
 /* Exported types ------------------------------------------------------------*/
 //#define MIA
