@@ -158,7 +158,7 @@ void SaveStatusData()
 void SaveConfig()
 {
   if( gIsConfigChanged ) {
-    gNeedSaveBackup = TRUE;
+    gIsStatusChanged = TRUE;
     // Overwrite entire config FLASH 
     uint8_t Attmpts = 0;
     while(++Attmpts <= 3) {
